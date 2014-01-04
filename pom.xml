@@ -13,6 +13,30 @@ tp://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<properties>
 	</properties>
 
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>https://github.com/edwardcapriolo/teknek-cassandra</url>
+		<connection>https://github.com/edwardcapriolo/teknek-cassandra.git
+		</connection>
+		<!--<developerConnection>scm:git:https://github.com/edwardcapriolo/teknek-core.git</developerConnection> -->
+		<!--<developerConnection>scm:git:git@github.com:juven/git-demo.git</developerConnection> -->
+		<developerConnection>scm:git:git@github.com:edwardcapriolo/teknek-cassandra.git
+		</developerConnection>
+	</scm>
+
 	<dependencies>
 		<dependency>
 			<groupId>io.teknek</groupId>
@@ -48,7 +72,7 @@ tp://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 			<version>2.0.2.0</version>
 			<scope>test</scope>
 		</dependency>
-            
+
 
 		<dependency>
 			<groupId>com.netflix.astyanax</groupId>
@@ -56,34 +80,24 @@ tp://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 			<version>1.56.44</version>
 		</dependency>
 
-                <dependency>
-        <groupId>com.netflix.astyanax</groupId>
-        <artifactId>astyanax-thrift</artifactId>
-        <version>1.56.44</version>
-	                        <exclusions>
-                                <exclusion>
-                                        <groupId>org.apache.thrift</groupId> <!-- Exclude Project-D from Project-B -->
-                                        <artifactId>libthrift</artifactId>
-                                </exclusion>
-                        </exclusions>
-
-</dependency>
-
-            
-		<!--
 		<dependency>
-			<groupId>org.hectorclient</groupId>
-			<artifactId>hector-core</artifactId>
-			<version>1.1-4</version>
+			<groupId>com.netflix.astyanax</groupId>
+			<artifactId>astyanax-thrift</artifactId>
+			<version>1.56.44</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.thrift</groupId> <!-- Exclude Project-D from Project-B -->
+					<artifactId>libthrift</artifactId>
+				</exclusion>
+			</exclusions>
+
 		</dependency>
 
-		<dependency>
-                        <groupId>org.hectorclient</groupId>
-                        <artifactId>hector-test</artifactId>
-                        <version>1.1-4</version>
-			<scope>test</scope>
-                </dependency>
-		-->
+
+		<!-- <dependency> <groupId>org.hectorclient</groupId> <artifactId>hector-core</artifactId> 
+			<version>1.1-4</version> </dependency> <dependency> <groupId>org.hectorclient</groupId> 
+			<artifactId>hector-test</artifactId> <version>1.1-4</version> <scope>test</scope> 
+			</dependency> -->
 
 		<dependency>
 			<groupId>log4j</groupId>
@@ -118,17 +132,30 @@ tp://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 		<pluginManagement>
 			<plugins>
 				<plugin>
-                                        <groupId>org.apache.maven.plugins</groupId>
-                                        <artifactId>maven-jar-plugin</artifactId>
-                                        <version>2.2</version>
-                                        <executions>
-                                                <execution>
-                                                        <goals>
-                                                                <goal>test-jar</goal>
-                                                        </goals>
-                                                </execution>
-                                        </executions>
-                                </plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>sign-artifacts</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>sign</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.2</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>test-jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-eclipse-plugin</artifactId>
@@ -188,12 +215,50 @@ tp://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 		</pluginManagement>
 	</build>
 	<repositories>
-		<!-- 
-		<repository>
-			<id>clojars.org</id>
-			<url>http://clojars.org/repo</url>
-		</repository>
-		 -->
+		<!-- <repository> <id>clojars.org</id> <url>http://clojars.org/repo</url> 
+			</repository> -->
 	</repositories>
-
+	<developers>
+		<developer>
+			<id>ecapriolo</id>
+			<name>Edward Capriolo</name>
+			<email>edlinuxguru@gmail.com</email>
+			<url />
+			<organization />
+			<organizationUrl />
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+	</developers>
+	<profiles>
+		<profile>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.1</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
