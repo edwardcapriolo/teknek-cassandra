@@ -49,11 +49,19 @@ public class CassandraBatchingOperator extends CassandraOperator {
  
   @Override
   public void handleTuple(ITuple tuple) {
-    m.withRow(new ColumnFamily((String) properties.get(COLUMN_FAMILY),
+    if (! getProperties().containsKey(INCREMENT)){
+      m.withRow(new ColumnFamily((String) properties.get(COLUMN_FAMILY),
             ByteBufferSerializer.get(),
             ByteBufferSerializer.get()), 
             (ByteBuffer) tuple.getField(ROW_KEY))
-    .putColumn((ByteBuffer) tuple.getField(COLUMN), (ByteBuffer) tuple.getField(VALUE));
+            .putColumn((ByteBuffer) tuple.getField(COLUMN), (ByteBuffer) tuple.getField(VALUE));
+    } else {
+      m.withRow(new ColumnFamily((String) properties.get(COLUMN_FAMILY),
+              ByteBufferSerializer.get(),
+              ByteBufferSerializer.get()), 
+              (ByteBuffer) tuple.getField(ROW_KEY))
+              .incrementCounterColumn((ByteBuffer) tuple.getField(COLUMN),((Number) tuple.getField(VALUE) ).longValue());
+    }
     count++;
     if (count % batchSize == 0){
       try {

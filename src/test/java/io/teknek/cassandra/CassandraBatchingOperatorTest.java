@@ -22,8 +22,25 @@ import com.netflix.astyanax.serializers.ByteBufferSerializer;
 
 public class CassandraBatchingOperatorTest extends EmbeddedCassandraServer { 
   
-  @SuppressWarnings("unchecked") 
   @Test
+  public void testCounter() throws CharacterCodingException, ConnectionException{
+    Operator o = new CassandraBatchingOperator();
+    o.setProperties(MapBuilder.makeMap(CassandraOperator.KEYSPACE, EmbeddedCassandraServer.KEYSPACE,
+            CassandraOperator.COLUMN_FAMILY, "StatsByMinute",
+            CassandraOperator.HOST_LIST, "localhost:9157", 
+            CassandraBatchingOperator.BATCH_SIZE, 1,
+            CassandraOperator.PORT, 9157,
+            CassandraOperator.INCREMENT, true));
+    ITuple t = new Tuple()
+      .withField(CassandraOperator.ROW_KEY, ByteBufferUtil.bytes("user1"))
+      .withField(CassandraOperator.COLUMN, ByteBufferUtil.bytes("firstname"))
+      .withField(CassandraOperator.VALUE, 5L);
+    o.handleTuple(t);
+    assertCounterResults();
+  }
+  
+  @SuppressWarnings("unchecked") 
+  @Test 
   public void testOperator() throws CharacterCodingException, ConnectionException{
     Operator o = new CassandraBatchingOperator();
     o.setProperties(MapBuilder.makeMap(CassandraOperator.KEYSPACE, EmbeddedCassandraServer.KEYSPACE,
@@ -52,6 +69,16 @@ public class CassandraBatchingOperatorTest extends EmbeddedCassandraServer {
     assertNotThere();
   }
   
+  public void assertCounterResults() throws CharacterCodingException, ConnectionException {
+    ColumnFamily<ByteBuffer, ByteBuffer> cf = ColumnFamily
+            .newColumnFamily("StatsByMinute", ByteBufferSerializer.get(),
+                    ByteBufferSerializer.get());
+    Column<ByteBuffer> result = keyspace.prepareQuery(cf)
+            .getKey(ByteBufferUtil.bytes("user1"))
+            .getColumn(ByteBufferUtil.bytes("firstname"))
+            .execute().getResult();
+    Assert.assertEquals(5L, result.getLongValue());
+  }
   
   public void assertResults() throws CharacterCodingException, ConnectionException {
     ColumnFamily<ByteBuffer, ByteBuffer> cf = ColumnFamily

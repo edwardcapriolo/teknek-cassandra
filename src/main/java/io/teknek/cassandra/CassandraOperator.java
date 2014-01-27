@@ -29,6 +29,7 @@ public class CassandraOperator extends Operator {
   public static final String VALUE = "cassandra.operator.value";
   public static final String TIMESTAMP = "cassandra.operator.timestamp";
   public static final String PORT = "cassandra.operator.port";
+  public static final String INCREMENT = "cassandra.operator.isincrement";
   
   protected String clusterName = "TestCluster";
   protected Keyspace keyspace;
@@ -57,11 +58,19 @@ public class CassandraOperator extends Operator {
   @Override
   public void handleTuple(ITuple tuple) {
     MutationBatch m = keyspace.prepareMutationBatch();
-    m.withRow(new ColumnFamily((String) properties.get(COLUMN_FAMILY),
+    if (! getProperties().containsKey(INCREMENT)){
+      m.withRow(new ColumnFamily((String) properties.get(COLUMN_FAMILY),
             ByteBufferSerializer.get(),
             ByteBufferSerializer.get()), 
             (ByteBuffer) tuple.getField(ROW_KEY))
-    .putColumn((ByteBuffer) tuple.getField(COLUMN), (ByteBuffer) tuple.getField(VALUE));
+            .putColumn((ByteBuffer) tuple.getField(COLUMN), (ByteBuffer) tuple.getField(VALUE));
+    } else {
+      m.withRow(new ColumnFamily((String) properties.get(COLUMN_FAMILY),
+              ByteBufferSerializer.get(),
+              ByteBufferSerializer.get()), 
+              (ByteBuffer) tuple.getField(ROW_KEY))
+              .incrementCounterColumn((ByteBuffer) tuple.getField(COLUMN),((Number) tuple.getField(VALUE) ).longValue());
+    }
     try {
       OperationResult<Void> result = m.execute();
     } catch (ConnectionException e) {
