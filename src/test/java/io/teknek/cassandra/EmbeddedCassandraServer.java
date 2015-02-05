@@ -2,8 +2,6 @@ package io.teknek.cassandra;
 
 import java.io.IOException;
 
-import me.prettyprint.cassandra.serializers.StringSerializer;
-
 import org.apache.cassandra.exceptions.ConfigurationException;
 
 import org.apache.thrift.transport.TTransportException;
