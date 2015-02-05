@@ -4,7 +4,7 @@
 	<groupId>io.teknek</groupId>
 	<artifactId>teknek-cassandra</artifactId>
 	<name>teknek-cassandra</name>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<description />
 	<packaging>jar</packaging>
 
